@@ -26,6 +26,7 @@ class Slider(models.Model):
 	image = models.ImageField(upload_to = 'media')
 	title = models.TextField()
 	rank = models.IntegerField(default = 1)
+	status  = models.CharField(choices = (('active','active'),('','default')),max_length = 25, blank = True)
 	description = models.TextField(blank = True)
 
 	def __str__(self):
