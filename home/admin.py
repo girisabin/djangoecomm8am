@@ -8,4 +8,5 @@ admin.site.register(Slider)
 admin.site.register(Contact)
 admin.site.register(Product)
 admin.site.register(Ad)
+admin.site.register(Cart)
 

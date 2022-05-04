@@ -66,3 +66,25 @@ class Product(models.Model):
 
 	def __str__(self):
 		return self.name
+
+class Contact(models.Model):
+	name = models.CharField(max_length = 300)
+	email = models.EmailField(max_length = 400)
+	
+	message = models.TextField()
+
+	def __str__(self):
+		return self.name		
+
+
+class Cart(models.Model):
+	user = models.CharField(max_length = 400)
+	slug = models.CharField(max_length = 400)
+	items = models.ForeignKey(Product, on_delete = models.CASCADE) 
+	quantity = models.IntegerField(default = 1)
+	total = models.IntegerField(default = 1)
+	checkout = models.BooleanField(default = False)
+
+
+	def __str__(self):
+		return self.user
