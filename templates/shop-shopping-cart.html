@@ -51,9 +51,17 @@
                       <strong><span>$</span>{{cart.items.price}}</strong>
                       {% endif %}
                     </td>
+                    {% if cart.items.discounted_price > 0 %}
                     <td class="goods-page-total">
-                      <strong><span>$</span>47.00</strong>
+                      
+                      <strong><span>$</span>{% widthratio cart.items.discounted_price 1 cart.quantity %}</strong>
                     </td>
+                    {% else %}
+                    <td class="goods-page-total">
+                      
+                      <strong><span>$</span>{% widthratio cart.items.price 1 cart.quantity %}</strong>
+                    </td>
+                    {% endif %}
                     <td class="del-goods-col">
                       <a class="del-goods" href="/deletecart/{{cart.slug}}">&nbsp;</a>
                     </td>
@@ -63,24 +71,30 @@
                 </div>
 
                 <div class="shopping-total">
+                  {% for cart in cart_product %}
                   <ul>
+                     {% if cart.items.discounted_price > 0 %}
                     <li>
                       <em>Sub total</em>
-                      <strong class="price"><span>$</span>47.00</strong>
+                      <strong class="price"><span>$</span>{% widthratio cart.items.discounted_price 1 cart.quantity %}</strong>
                     </li>
+                    {% else %}
+                     <li>
+                      <em>Sub total</em>
+                      <strong class="price"><span>$</span>{% widthratio cart.items.price 1 cart.quantity %}</strong>
+                    </li>
+                    {% endif %}
                     <li>
                       <em>Shipping cost</em>
                       <strong class="price"><span>$</span>3.00</strong>
                     </li>
-                    <li class="shopping-total-price">
-                      <em>Total</em>
-                      <strong class="price"><span>$</span>50.00</strong>
-                    </li>
+                   
                   </ul>
+                  {% endfor %}
                 </div>
               </div>
               <button class="btn btn-default" type="submit">Continue shopping <i class="fa fa-shopping-cart"></i></button>
-              <button class="btn btn-primary" type="submit">Checkout <i class="fa fa-check"></i></button>
+              <button class="btn btn-primary" type="submit" ><a href="checkout"><font color="white">Checkout</font></a> <i class="fa fa-check"></i></button>
             </div>
           </div>
           <!-- END CONTENT -->

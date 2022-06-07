@@ -96,6 +96,9 @@ def signup(request):
 
 	return render(request,'shop-standart-forms.html')
 
+my_email = 'tomlove135795@gmail.com'
+from django.core.mail import EmailMessage
+
 def contact(request):
     if request.method == 'POST':
         name = request.POST['name']
@@ -106,10 +109,16 @@ def contact(request):
         data = Contact.objects.create(
             name = name,
             email = email,
-           
-            message = message
+            message = message,
             )
         data.save()
+        send_email = EmailMessage(
+        	'Thank you',
+        	f'Thank you for messaging us dear {name}',
+        	my_email,
+        	[email]
+        	)
+        send_email.send()
         return render(request,'shop-contacts.html',{"message":"Success"})
 
     return render(request,'shop-contacts.html')
@@ -120,6 +129,10 @@ class CartView(BaseView):
 		self.view['cart_product'] = Cart.objects.filter(user = request.user.username, checkout = False)
 		return render(request,'shop-shopping-cart.html',self.view)
 
+class Checkout(BaseView):
+	def get(self,request):
+		self.view['cart_product'] = Cart.objects.filter(user = request.user.username, checkout = False)
+		return render(request,'shop-checkout.html',self.view)
 
 def add_to_cart(request,slug):
 	if Cart.objects.filter(slug = slug, user = request.user.username, checkout = False).exists():
@@ -139,6 +152,8 @@ def add_to_cart(request,slug):
 
 	return redirect('/mycart')
 	
+
+
 
 def deletecart(request,slug):
 	if Cart.objects.filter(slug = slug, user = request.user.username, checkout = False).exists():
@@ -167,7 +182,58 @@ from .models import *
 from .serializers import *
 from rest_framework import viewsets
 
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets,generics
+from rest_framework.filters import OrderingFilter,SearchFilter 
+
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 # ViewSets define the view behavior.
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+
+
+class ProductFilterView(generics.ListAPIView):
+	queryset = Product.objects.all()
+	serializer_class = ProductSerializer
+
+	filter_backends = (DjangoFilterBackend,OrderingFilter,SearchFilter)
+	filter_fields = ['id','category','subcategory','labels','status']
+	ordering_fields = ['id','price','name']
+	search_fields = ['name','description']
+
+class ProductCRUDViewSet(APIView):
+	def get_object(self,pk):
+		try:
+			return Product.objects.get(pk = pk)
+
+		except:
+			print("This id is not in db")
+
+	def get(self,request,pk):
+		product = self.get_object(pk)
+		serializer = ProductSerializer(product)	
+		return Response(serializer.data)
+
+	def post(self,request,pk):
+		serializer = ProductSerializer(data = request.data)	
+		if serializer.is_valid():
+			serializer.save()
+			return Response(serializer.data, status = status.HTTP_201_CREATED)
+		return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+
+	def put(self,request,pk):
+		product = self.get_object(pk)
+		serializer = ProductSerializer(product,data = request.data)	
+		if serializer.is_valid():
+			serializer.save()
+			return Response(serializer.data)
+		return Response(serializer.data, status = status.HTTP_400_BAD_REQUEST)
+		
+	def delete(self,request,pk):
+		product = self.get_object(pk)
+		product.delete()
+		return Response(status = status.HTTP_204_NO_CONTENT)		
